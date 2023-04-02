@@ -1,5 +1,6 @@
-import { StyleSheet, View, Text, Button, TextInput, ImageBackground, TouchableOpacity } from 'react-native';
-import React from 'react';
+import { StyleSheet, View, Text, Button, TextInput, ImageBackground, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useState } from 'react';
+import { getAuth, signInAnonymously } from 'firebase/auth';
 
 const backgroundColors = {
     black: { backgroundColor: '#000000' },
@@ -8,26 +9,42 @@ const backgroundColors = {
     green: { backgroundColor: '#94ae89' }
 }
 
-export default class Start extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state={ name: '', color: ''};
+const Start = ({ navigation }) => {
+    const { black, grey, purple, green } = backgroundColors;
+    const [name, setName] = useState('');
+    const [color, setColor] = useState('');
+
+    //initialize Firebase authentication handler
+    const auth = getAuth();
+
+    //sign-in logic
+    const signInUser = () => {
+        signInAnonymously(auth)
+            .then(result => {
+                navigation.navigate('Chat', {
+                    name: name,
+                    color: color,
+                    userID: result.user.uid 
+                });
+                Alert.alert('Signed in successfully!');
+            })
+            .catch((error) => {
+                Alert.alert('Unable to sign in, try again later.');
+            })
     }
 
-    render () {
-        const { black, grey, purple, green } = backgroundColors;
-        return (
-            <View style={styles.container}>
-                <ImageBackground
-                    source={require('../assets/Background-Image.png')}
-                    style={[styles.container, styles.image]}
-                >
-                    <Text style={styles.title}>Chat App</Text>
+    return (
+        <KeyboardAvoidingView style = {{ flex: 1 }}>
+            <ImageBackground
+                source={require('../assets/Background-Image.png')}
+                style={[styles.container, styles.image]}
+            >
+                <Text style={styles.title}>Chat App</Text>
                     <View style={styles.inputBox}>
                         <TextInput
                             style={styles.nameBox}
-                            value={this.state.name}
-                            onChangeText={(name) => this.setState({name})}
+                            value={name}
+                            onChangeText={(name) => setName(name)}
                             placeholder='Type your username here'
                         />
                         <View>
@@ -35,42 +52,38 @@ export default class Start extends React.Component {
                             <View style={styles.colorWrapper}>
                                 <TouchableOpacity style={[styles.color, black]}
                                     onPress={() =>
-                                    this.setState({ color: black.backgroundColor })
+                                    setColor(black.backgroundColor)
                                 } />
                                 <TouchableOpacity style={[styles.color, grey]}
                                     onPress={() => 
-                                    this.setState({ color: grey.backgroundColor })
+                                    setColor(grey.backgroundColor)
                                 } />
                                 <TouchableOpacity style={[styles.color, purple]}
                                     onPress={() => 
-                                    this.setState({ color: purple.backgroundColor })
+                                    setColor(purple.backgroundColor)
                                 } />
                                 <TouchableOpacity style={[styles.color, green]}
                                     onPress={() => 
-                                    this.setState({ color: green.backgroundColor })
+                                    setColor(green.backgroundColor)
                                 } />
                             </View>
                         </View>
                         <TouchableOpacity  
                             style={[styles.nameBox, styles.chatBox]}
-                            onPress={() => 
-                            this.props.navigation.navigate('Chat',
-                            {
-                                name: this.state.name,
-                                color: this.state.color
-                            })
-                            }
+                            onPress={signInUser}
                             >
                                 <Text style={[styles.colorSelector, styles.chatBoxText]}>
                                     Start Chatting
                                 </Text>
                             </TouchableOpacity>
                     </View>
-                </ImageBackground>
-            </View>
-        )
-    }
+                    {Platform.OS === 'android' ? <KeyboardAvoidingView behavior='height' /> : null}
+                    {Platform.OS === 'ios' ? <KeyboardAvoidingView behavior='padding' /> : null}
+            </ImageBackground>
+        </KeyboardAvoidingView>
+    )
 }
+    
 
 const styles = StyleSheet.create({
     container: {
@@ -141,5 +154,6 @@ const styles = StyleSheet.create({
         color: '#ffffff',
         fontWeight: '300'
     }
-})
+});
    
+export default Start;
