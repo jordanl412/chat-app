@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, Button, TextInput, ImageBackground, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, View, Text, Button, TextInput, ImageBackground, TouchableOpacity, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import React, { useState } from 'react';
 import { getAuth, signInAnonymously } from 'firebase/auth';
 
@@ -14,7 +14,6 @@ const Start = ({ navigation }) => {
     const [name, setName] = useState('');
     const [color, setColor] = useState('');
 
-    //initialize Firebase authentication handler
     const auth = getAuth();
 
     //sign-in logic
