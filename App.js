@@ -9,7 +9,9 @@ import { useNetInfo } from '@react-native-community/netinfo';
 import { useEffect } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getFirestore,disableNetwork, enableNetwork } from 'firebase/firestore';
-import { Alert } from 'react-native';
+import { Alert, LogBox } from 'react-native';
+
+LogBox.ignoreLogs(['AsyncStorage has been extracted from']);
 
 const App = () => {
   //Represents network connectivity status
