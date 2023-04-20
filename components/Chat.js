@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { GiftedChat, Bubble, InputToolbar } from 'react-native-gifted-chat';
 import { collection, query, orderBy, onSnapshot, addDoc, where } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import CustomActions from './CustomActions';
+import MapView from 'react-native-maps';
 
 const renderBubble = (props) => {
     return (
@@ -25,7 +27,7 @@ const renderInputToolbar = (props, isConnected) => {
     else return null;
 };
 
-export default function Chat({ navigation, route, db, isConnected }) {
+export default function Chat({ navigation, route, db, isConnected, storage }) {
 
     const [messages, setMessages] = useState([]);
 
@@ -97,6 +99,35 @@ export default function Chat({ navigation, route, db, isConnected }) {
         });
     };
 
+    //adds renderActions circle button
+    const renderCustomActions = (props) => {
+        return <CustomActions storage={storage} {...props} />;
+    };
+
+    //check if currentMessage contains data, and if so, return a MapView
+    const renderCustomView = (props) => {
+        const { currentMessage } = props;
+        if (currentMessage.location) {
+            return (
+                <MapView
+                    style={{
+                        width: 150,
+                        height: 100,
+                        borderRadius: 13,
+                        margin: 3
+                    }}
+                    region={{
+                        latitude: currentMessage.location.latitude,
+                        longitude: currentMessage.location.longitude,
+                        latitudeDelta: 0.0922,
+                        longitudeDelta: 0.0421,
+                    }}
+                />
+            );
+        }
+        return null;
+    }
+
     return (
         <View style={[styles.container, { backgroundColor: route.params.color }]}>
             <GiftedChat
@@ -104,6 +135,8 @@ export default function Chat({ navigation, route, db, isConnected }) {
                 renderBubble={renderBubble}
                 renderInputToolbar={(props) => renderInputToolbar(props, isConnected)}
                 onSend={messages => onSend(messages)}
+                renderActions={renderCustomActions}
+                renderCustomView={renderCustomView}
                 user = {{
                     _id: 'state.user._id',
                     name: route.params.name
